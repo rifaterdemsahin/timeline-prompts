@@ -1,0 +1,683 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Learning Calculator — Timeline Prompts</title>
+<style>
+  :root {
+    --bg: #141A33;
+    --panel: #1b2247;
+    --panel-2: #202a56;
+    --amber: #F5A623;
+    --mint: #3DDC97;
+    --off-white: #F4F4F0;
+    --muted: #9aa3c9;
+    --border: rgba(244, 244, 240, 0.12);
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background: radial-gradient(circle at 20% 0%, #1b2350 0%, var(--bg) 55%);
+    color: var(--off-white);
+    min-height: 100vh;
+  }
+
+  /* ---------- Top menu ---------- */
+  .topmenu {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+    padding: 12px 20px;
+    background: rgba(19, 24, 51, 0.92);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--border);
+  }
+  .topmenu-brand {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    font-weight: 700;
+    font-size: 1rem;
+    white-space: nowrap;
+  }
+  .topmenu-brand .sub {
+    font-weight: 400;
+    font-size: 0.75rem;
+    color: var(--muted);
+  }
+  .topmenu-group {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+  .view-toggle {
+    display: flex;
+    background: var(--panel-2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 3px;
+    gap: 3px;
+  }
+  .view-toggle button {
+    padding: 6px 12px;
+    border-radius: 6px;
+    background: transparent;
+    color: var(--muted);
+    font-size: 0.78rem;
+  }
+  .view-toggle button.active {
+    background: var(--amber);
+    color: #14141a;
+  }
+
+  .search-box {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--panel-2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 6px 10px;
+    min-width: 180px;
+  }
+  .search-box .icon { font-size: 0.85rem; }
+  .search-box input {
+    background: transparent;
+    border: none;
+    outline: none;
+    color: var(--off-white);
+    font-family: inherit;
+    font-size: 0.82rem;
+    width: 140px;
+  }
+  .search-box input::placeholder { color: var(--muted); }
+  .search-box .clear-btn {
+    background: transparent;
+    border: none;
+    color: var(--muted);
+    padding: 0 2px;
+    font-size: 0.9rem;
+    cursor: pointer;
+    display: none;
+  }
+  .search-box.has-value .clear-btn { display: inline; }
+
+  .no-results {
+    text-align: center;
+    color: var(--muted);
+    padding: 40px 24px;
+    font-size: 0.9rem;
+  }
+
+  header {
+    padding: 28px 24px 6px;
+    text-align: center;
+  }
+  header h1 {
+    margin: 0 0 6px;
+    font-size: 1.5rem;
+    letter-spacing: 0.02em;
+  }
+  header p {
+    margin: 0;
+    color: var(--muted);
+    font-size: 0.9rem;
+  }
+
+  button {
+    font-family: inherit;
+    font-size: 0.85rem;
+    font-weight: 600;
+    border: none;
+    border-radius: 8px;
+    padding: 9px 16px;
+    cursor: pointer;
+    transition: transform 0.15s ease, filter 0.15s ease;
+    white-space: nowrap;
+  }
+  button:active { transform: scale(0.97); }
+  .btn-amber { background: var(--amber); color: #14141a; }
+  .btn-mint { background: var(--mint); color: #0c2318; }
+  .btn-ghost {
+    background: transparent;
+    color: var(--off-white);
+    border: 1px solid var(--border);
+  }
+  button:hover { filter: brightness(1.08); }
+
+  .status {
+    text-align: center;
+    min-height: 20px;
+    font-size: 0.8rem;
+    color: var(--mint);
+    transition: opacity 0.3s ease;
+  }
+
+  /* ---------- Vertical timeline (default) ---------- */
+  .timeline {
+    position: relative;
+    max-width: 760px;
+    margin: 24px auto 80px;
+    padding: 0 24px;
+  }
+  .timeline::before {
+    content: "";
+    position: absolute;
+    left: 42px;
+    top: 8px;
+    bottom: 8px;
+    width: 2px;
+    background: linear-gradient(to bottom, var(--amber), var(--mint));
+    opacity: 0.4;
+  }
+  .shot {
+    position: relative;
+    padding-left: 68px;
+    margin-bottom: 28px;
+  }
+  .shot-marker {
+    position: absolute;
+    left: 26px;
+    top: 6px;
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    background: var(--panel-2);
+    border: 2px solid var(--amber);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 0.85rem;
+    color: var(--amber);
+    z-index: 1;
+  }
+  .shot.edited .shot-marker {
+    border-color: var(--mint);
+    color: var(--mint);
+  }
+
+  /* ---------- Horizontal timeline ---------- */
+  .timeline.horizontal {
+    max-width: 100%;
+    display: flex;
+    flex-direction: row;
+    align-items: flex-start;
+    overflow-x: auto;
+    gap: 20px;
+    padding: 46px 24px 28px;
+    margin: 24px 0 80px;
+    scroll-snap-type: x proximity;
+  }
+  .timeline.horizontal::before {
+    left: 24px;
+    right: 24px;
+    top: 24px;
+    bottom: auto;
+    width: auto;
+    height: 2px;
+    background: linear-gradient(to right, var(--amber), var(--mint));
+  }
+  .timeline.horizontal .shot {
+    flex: 0 0 320px;
+    padding-left: 0;
+    padding-top: 46px;
+    margin-bottom: 0;
+    scroll-snap-align: start;
+  }
+  .timeline.horizontal .shot-marker {
+    left: 50%;
+    top: 6px;
+    transform: translateX(-50%);
+  }
+  .timeline.horizontal .card-head h2 {
+    font-size: 0.95rem;
+  }
+
+  .card {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 18px 20px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.25);
+  }
+  .card-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 12px;
+    margin-bottom: 4px;
+    flex-wrap: wrap;
+  }
+  .card-head h2 {
+    margin: 0;
+    font-size: 1.05rem;
+    color: var(--off-white);
+  }
+  .card-head .timing {
+    font-size: 0.75rem;
+    color: var(--muted);
+    white-space: nowrap;
+  }
+  .field {
+    margin-top: 12px;
+  }
+  .field label {
+    display: block;
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--muted);
+    margin-bottom: 4px;
+  }
+  .field textarea, .field input {
+    width: 100%;
+    background: #10152c;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--off-white);
+    font-family: inherit;
+    font-size: 0.85rem;
+    padding: 9px 11px;
+    resize: vertical;
+    line-height: 1.4;
+  }
+  .field textarea:focus, .field input:focus {
+    outline: none;
+    border-color: var(--mint);
+  }
+  .field.caption input { font-style: italic; }
+  .card-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    margin-top: 14px;
+  }
+  .card-actions button {
+    font-size: 0.75rem;
+    padding: 6px 12px;
+  }
+  footer {
+    text-align: center;
+    color: var(--muted);
+    font-size: 0.75rem;
+    padding-bottom: 40px;
+  }
+  .toast {
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: var(--mint);
+    color: #0c2318;
+    font-weight: 600;
+    font-size: 0.85rem;
+    padding: 10px 20px;
+    border-radius: 999px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.25s ease, transform 0.25s ease;
+    z-index: 10;
+  }
+  .toast.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+</style>
+</head>
+<body>
+
+<nav class="topmenu">
+  <div class="topmenu-brand">🎬 Learning Calculator <span class="sub">Timeline Prompts</span></div>
+  <div class="topmenu-group">
+    <div class="search-box" id="searchBox">
+      <span class="icon">🔍</span>
+      <input type="text" id="searchInput" placeholder="Search prompts…" />
+      <button class="clear-btn" id="searchClearBtn" title="Clear search">✕</button>
+    </div>
+    <div class="view-toggle" role="group" aria-label="Timeline layout">
+      <button id="viewVerticalBtn" class="active">↕️ Vertical</button>
+      <button id="viewHorizontalBtn">↔️ Horizontal</button>
+    </div>
+    <button class="btn-mint" id="saveBtn">💾 Save to Cookie</button>
+    <button class="btn-amber" id="copyBtn">📋 Copy All Prompts</button>
+    <button class="btn-ghost" id="resetBtn">♻️ Reset to Defaults</button>
+  </div>
+</nav>
+
+<header>
+  <h1>Learning Calculator — Faceless Promo</h1>
+  <p>🎞️ 9:16 · ~40s · 8 shots · start/end frame interpolation timeline</p>
+</header>
+
+<div class="status" id="statusMsg"></div>
+
+<div class="timeline" id="timeline"></div>
+
+<footer>🔒 Edits are saved to a browser cookie on this device — nothing leaves your machine.</footer>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const SHOT_COOKIE_PREFIX = "learning_calculator_shot_v1_";
+const LAYOUT_COOKIE_NAME = "learning_calculator_layout_v1";
+
+const defaultShots = [
+  {
+    title: "🪝 Hook",
+    timing: "0:00–0:05",
+    vo: "You want to learn something new… but where do you even start?",
+    caption: "where do i even start?",
+    start: "Soft-3D scene, 9:16. A faceless person seen from behind, silhouette shoulders and head only, sitting at a cozy dark desk facing a wall covered in a chaotic swirl of floating icons — books, video thumbnails, question marks, sticky notes — all disorganized and overlapping. Deep indigo background, warm amber rim light. Overwhelmed, cluttered mood. [Style Bible]",
+    end: "Identical scene and camera. The same faceless silhouette from behind, same desk, but the floating cloud of icons has drifted CLOSER and denser around their head, question marks larger and more numerous, slight chaotic spiral tightening. Same lighting. [Style Bible]",
+    motion: "Slow push-in on the silhouette; the icon cloud swirls and tightens around the head, question marks gently pulsing. Subtle, anxious drift."
+  },
+  {
+    title: "😤 Agitate",
+    timing: "0:05–0:10",
+    vo: "Random videos. Endless notes. Motivation gone by day three.",
+    caption: "the plan always dies by day 3",
+    start: "Soft-3D flat-lay top-down, 9:16. A dark desk surface with a scattered mess: an open notebook full of messy scribbles, three phones showing different paused videos, coffee cup, sticky notes everywhere. A small mint-green motivation bar in the corner reads FULL. Indigo tones, warm side light. [Style Bible]",
+    end: "Identical top-down desk, same objects in same positions. The mint-green motivation bar in the corner has DRAINED to nearly empty and shifted to a dull grey-red. Everything else unchanged. [Style Bible]",
+    motion: "Locked top-down camera, tiny handheld drift. The motivation bar depletes left-to-right; a couple of sticky notes flutter and curl at the edges."
+  },
+  {
+    title: "✨ Reveal",
+    timing: "0:10–0:15",
+    vo: "So I built a Learning Calculator.",
+    caption: "so i built this →",
+    start: "Soft-3D hero product shot, 9:16. A modern smartphone lying face-up on a clean dark surface, screen OFF (black), single warm amber spotlight from above, mint accents in the bokeh background. Premium, minimal, lots of negative space. [Style Bible]",
+    end: "Identical phone, identical position and lighting. The screen is now ON, glowing, showing a clean app home screen titled \"Learning Calculator\" with a large amber input field and a mint \"Calculate\" button. Soft screen glow lights the surface. [Style Bible]",
+    motion: "Phone screen powers on with a bloom of light; a gentle rack-focus settles onto the UI; faint light rays rise from the screen."
+  },
+  {
+    title: "⌨️ Input",
+    timing: "0:15–0:20",
+    vo: "Tell it what you want to learn, your deadline, and where you're starting from.",
+    caption: "goal · deadline · level",
+    start: "Soft-3D over-the-shoulder / hands-only shot, 9:16. Faceless — only two hands hold the phone (no face, no arms above wrist). Screen shows the Learning Calculator input form with three EMPTY fields: \"What to learn\", \"Deadline\", \"Current level\". Amber accents, indigo background bokeh. [Style Bible]",
+    end: "Identical hands, identical phone and framing. The three fields are now FILLED — \"Learn: Spanish\", \"Deadline: 60 days\", \"Level: Beginner\" — the mint \"Calculate\" button now glowing/active. Nothing else changes. [Style Bible]",
+    motion: "Locked framing on the hands; each field fills in sequence with a soft type-in shimmer; the Calculate button lights up and gently pulses at the end. A thumb hovers toward it."
+  },
+  {
+    title: "🧮 Calculation",
+    timing: "0:20–0:25",
+    vo: "It does the math — spacing, memory science, real study targets.",
+    caption: "the science, calculated",
+    start: "Soft-3D macro of the phone screen filling the frame, 9:16. A dark UI with a central amber \"Calculating…\" ring at 0%, surrounded by faint floating equations, a forgetting-curve graph line, and small spaced-repetition dots — all dim and static. [Style Bible]",
+    end: "Identical screen and layout. The amber ring is now full at 100% mint-green, the forgetting-curve line has drawn itself into a smooth curve, the spaced-repetition dots now glow along it, equations brighter. Same framing. [Style Bible]",
+    motion: "Camera holds on the screen. The progress ring sweeps 0→100%, the curve animates drawing left-to-right, dots light up one by one along the curve. Data-viz coming alive."
+  },
+  {
+    title: "📅 Output / The Plan",
+    timing: "0:25–0:30",
+    vo: "And hands you a day-by-day plan that fits your real life.",
+    caption: "your plan, day by day",
+    start: "Soft-3D shot, 9:16. The phone stands upright, screen showing a single collapsed card labeled \"Your 60-Day Plan\" with a mint checkmark. Clean, calm, centered. Warm rim light, indigo backdrop. [Style Bible]",
+    end: "Identical phone and framing. The single card has EXPANDED / fanned into a vertical stack of daily task cards (Day 1, Day 2, Day 3…) cascading down the screen, each with small progress ticks. Same lighting and position. [Style Bible]",
+    motion: "Static phone. The single card unfolds and the daily cards cascade/fan downward in sequence like a deck spreading, settling into a neat stack."
+  },
+  {
+    title: "📈 Transformation",
+    timing: "0:30–0:35",
+    vo: "No more guessing. Just do today's block and watch it fill.",
+    caption: "momentum, finally",
+    start: "Soft-3D scene mirroring Shot 1 for payoff, 9:16. The SAME faceless silhouette from behind at the SAME desk, but now calm and upright. The wall in front shows one clean glowing app screen; a large progress bar across the top is nearly EMPTY (amber). Tidy, focused mood, warm light. [Style Bible]",
+    end: "Identical calm scene and camera. The large top progress bar has FILLED to ~80% in mint-green, a few daily cards now show mint checkmarks. Same silhouette, same framing. Confident, satisfying. [Style Bible]",
+    motion: "Gentle slow push-in on the silhouette; the progress bar fills left-to-right in mint; checkmarks pop softly one by one; light warms slightly."
+  },
+  {
+    title: "👉 CTA",
+    timing: "0:35–0:40",
+    vo: "Stop planning to learn. Start calculating it. Link's in the description.",
+    caption: "try the Learning Calculator → link below",
+    start: "Soft-3D final hero shot, 9:16. The phone centered, screen showing the Learning Calculator logo/home with the mint \"Calculate\" button. Below it, empty space where a call-to-action arrow will appear. Premium spotlight, indigo + amber + mint. [Style Bible]",
+    end: "Identical phone, identical framing and lighting. A glowing mint downward CTA arrow and a subtle \"Try it free\" pill button have appeared beneath the phone, the whole frame slightly brighter and more inviting. [Style Bible]",
+    motion: "Phone holds center; a mint CTA arrow rises and bounces gently into place; a soft light bloom pulses once on the Calculate button. End on a clean, held beat for the caption."
+  }
+];
+
+const FIELDS = [
+  { key: "vo", label: "🎙️ VO", type: "textarea", rows: 2 },
+  { key: "caption", label: "💬 Caption", type: "input", cssClass: "caption" },
+  { key: "start", label: "🖼️ Start Frame", type: "textarea", rows: 4 },
+  { key: "end", label: "🏁 End Frame", type: "textarea", rows: 4 },
+  { key: "motion", label: "🎥 Motion", type: "textarea", rows: 2 }
+];
+
+function getCookie(name) {
+  const match = document.cookie.match(new RegExp("(^| )" + name + "=([^;]+)"));
+  return match ? decodeURIComponent(match[2]) : null;
+}
+
+function setCookie(name, value, days) {
+  const maxAge = days * 24 * 60 * 60;
+  document.cookie = `${name}=${encodeURIComponent(value)}; max-age=${maxAge}; path=/; SameSite=Lax`;
+}
+
+function loadShots() {
+  return defaultShots.map((defaultShot, i) => {
+    const raw = getCookie(SHOT_COOKIE_PREFIX + i);
+    if (!raw) return structuredClone(defaultShot);
+    try {
+      const parsed = JSON.parse(raw);
+      if (parsed && typeof parsed === "object") {
+        return { ...structuredClone(defaultShot), ...parsed };
+      }
+    } catch (e) {
+      console.warn(`Could not parse saved cookie for shot ${i}, using default.`, e);
+    }
+    return structuredClone(defaultShot);
+  });
+}
+
+let shots = loadShots();
+let layout = getCookie(LAYOUT_COOKIE_NAME) === "horizontal" ? "horizontal" : "vertical";
+
+const timelineEl = document.getElementById("timeline");
+const statusEl = document.getElementById("statusMsg");
+const toastEl = document.getElementById("toast");
+const viewVerticalBtn = document.getElementById("viewVerticalBtn");
+const viewHorizontalBtn = document.getElementById("viewHorizontalBtn");
+
+function showToast(msg) {
+  toastEl.textContent = msg;
+  toastEl.classList.add("show");
+  clearTimeout(showToast._t);
+  showToast._t = setTimeout(() => toastEl.classList.remove("show"), 2200);
+}
+
+function isEdited(i) {
+  const s = shots[i], d = defaultShots[i];
+  return FIELDS.some(f => s[f.key] !== d[f.key]);
+}
+
+let searchQuery = "";
+
+function matchesSearch(shot) {
+  if (!searchQuery) return true;
+  const haystack = [shot.title, shot.timing, shot.vo, shot.caption, shot.start, shot.end, shot.motion]
+    .join(" ")
+    .toLowerCase();
+  return haystack.includes(searchQuery);
+}
+
+function applyLayout() {
+  timelineEl.classList.toggle("horizontal", layout === "horizontal");
+  viewVerticalBtn.classList.toggle("active", layout === "vertical");
+  viewHorizontalBtn.classList.toggle("active", layout === "horizontal");
+}
+
+function setLayout(next) {
+  layout = next;
+  setCookie(LAYOUT_COOKIE_NAME, layout, 365);
+  applyLayout();
+}
+
+function render() {
+  timelineEl.innerHTML = "";
+  const visibleShots = shots
+    .map((shot, i) => ({ shot, i }))
+    .filter(({ shot }) => matchesSearch(shot));
+
+  if (visibleShots.length === 0) {
+    const empty = document.createElement("div");
+    empty.className = "no-results";
+    empty.textContent = `🔍 No shots match "${searchQuery}"`;
+    timelineEl.appendChild(empty);
+    return;
+  }
+
+  visibleShots.forEach(({ shot, i }) => {
+    const shotEl = document.createElement("div");
+    shotEl.className = "shot" + (isEdited(i) ? " edited" : "");
+
+    const marker = document.createElement("div");
+    marker.className = "shot-marker";
+    marker.textContent = i + 1;
+    shotEl.appendChild(marker);
+
+    const card = document.createElement("div");
+    card.className = "card";
+
+    const head = document.createElement("div");
+    head.className = "card-head";
+    head.innerHTML = `<h2>Shot ${i + 1} — ${shot.title}</h2><span class="timing">⏱️ ${shot.timing}</span>`;
+    card.appendChild(head);
+
+    FIELDS.forEach(f => {
+      const field = document.createElement("div");
+      field.className = "field" + (f.cssClass ? " " + f.cssClass : "");
+      const label = document.createElement("label");
+      label.textContent = f.label;
+      field.appendChild(label);
+
+      let input;
+      if (f.type === "textarea") {
+        input = document.createElement("textarea");
+        input.rows = f.rows || 3;
+      } else {
+        input = document.createElement("input");
+        input.type = "text";
+      }
+      input.value = shot[f.key];
+      input.dataset.index = i;
+      input.dataset.key = f.key;
+      input.addEventListener("input", (e) => {
+        shots[i][f.key] = e.target.value;
+        shotEl.classList.toggle("edited", isEdited(i));
+        statusEl.textContent = "✏️ Unsaved changes…";
+      });
+      field.appendChild(input);
+      card.appendChild(field);
+    });
+
+    const actions = document.createElement("div");
+    actions.className = "card-actions";
+    const resetShotBtn = document.createElement("button");
+    resetShotBtn.className = "btn-ghost";
+    resetShotBtn.textContent = "♻️ Reset shot";
+    resetShotBtn.addEventListener("click", () => {
+      shots[i] = structuredClone(defaultShots[i]);
+      render();
+      statusEl.textContent = "✏️ Unsaved changes…";
+    });
+    const copyShotBtn = document.createElement("button");
+    copyShotBtn.className = "btn-amber";
+    copyShotBtn.textContent = "📋 Copy shot";
+    copyShotBtn.addEventListener("click", () => copyText(formatShot(shots[i], i), "✅ Shot " + (i + 1) + " copied"));
+    actions.appendChild(resetShotBtn);
+    actions.appendChild(copyShotBtn);
+    card.appendChild(actions);
+
+    shotEl.appendChild(card);
+    timelineEl.appendChild(shotEl);
+  });
+}
+
+function formatShot(shot, i) {
+  return [
+    `Shot ${i + 1} — ${shot.title} (${shot.timing})`,
+    `VO: ${shot.vo}`,
+    `Caption: ${shot.caption}`,
+    `Start frame: ${shot.start}`,
+    `End frame: ${shot.end}`,
+    `Motion: ${shot.motion}`
+  ].join("\n");
+}
+
+function formatAll() {
+  return shots.map(formatShot).join("\n\n---\n\n");
+}
+
+async function copyText(text, msg) {
+  try {
+    await navigator.clipboard.writeText(text);
+    showToast(msg);
+  } catch (e) {
+    const ta = document.createElement("textarea");
+    ta.value = text;
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand("copy");
+    document.body.removeChild(ta);
+    showToast(msg);
+  }
+}
+
+document.getElementById("saveBtn").addEventListener("click", () => {
+  shots.forEach((shot, i) => setCookie(SHOT_COOKIE_PREFIX + i, JSON.stringify(shot), 365));
+  statusEl.textContent = "✅ Saved";
+  showToast("💾 Saved to cookie");
+  setTimeout(() => { if (statusEl.textContent === "✅ Saved") statusEl.textContent = ""; }, 2000);
+});
+
+document.getElementById("copyBtn").addEventListener("click", () => {
+  copyText(formatAll(), "✅ All 8 prompts copied");
+});
+
+document.getElementById("resetBtn").addEventListener("click", () => {
+  if (!confirm("Reset all shots to the original defaults? This clears your saved cookies.")) return;
+  shots = structuredClone(defaultShots);
+  shots.forEach((_, i) => { document.cookie = `${SHOT_COOKIE_PREFIX + i}=; max-age=0; path=/`; });
+  render();
+  statusEl.textContent = "♻️ Reset to defaults";
+  showToast("♻️ Reset to defaults");
+});
+
+viewVerticalBtn.addEventListener("click", () => setLayout("vertical"));
+viewHorizontalBtn.addEventListener("click", () => setLayout("horizontal"));
+
+const searchBox = document.getElementById("searchBox");
+const searchInput = document.getElementById("searchInput");
+const searchClearBtn = document.getElementById("searchClearBtn");
+
+searchInput.addEventListener("input", (e) => {
+  searchQuery = e.target.value.trim().toLowerCase();
+  searchBox.classList.toggle("has-value", searchQuery.length > 0);
+  render();
+});
+
+searchClearBtn.addEventListener("click", () => {
+  searchQuery = "";
+  searchInput.value = "";
+  searchBox.classList.remove("has-value");
+  searchInput.focus();
+  render();
+});
+
+applyLayout();
+render();
+</script>
+
+</body>
+</html>
